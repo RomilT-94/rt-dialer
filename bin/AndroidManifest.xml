@@ -1,101 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  - Copyright 2012 Google Inc.
-  -
-  - Licensed under the Apache License, Version 2.0 (the "License"); you may not
-  - use this file except in compliance with the License. You may obtain a copy
-  - of the License at
-  -
-  - http://www.apache.org/licenses/LICENSE-2.0
-  -
-  - Unless required by applicable law or agreed to in writing, software
-  - distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-  - WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-  - License for the specific language governing permissions and limitations
-  - under the License.
--->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.gcm.demo.app"
+    package="com.railtiffin.railtiffin_dialer_application"
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <!-- GCM requires Android SDK version 2.2 (API level 8) or above. -->
-    <!-- The targetSdkVersion is optional, but it's always a good practice
-         to target higher versions. -->
-    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="16"/>
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="22" />
 
-    <!-- GCM connects to Google Services. -->
+    <!-- Pushy Permissions -->
+
+
+    <!-- Added in Pushy SDK v1.0.0 -->
     <uses-permission android:name="android.permission.INTERNET" />
-    
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Added in Pushy SDK v1.0.1 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- End Pushy Permissions -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
 
-    <!-- GCM requires a Google account. -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-
-    <!-- Keeps the processor from sleeping when a message is received. -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!--
-     Creates a custom permission so only this app can receive its messages.
-
-     NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
-           where PACKAGE is the application's package name.
-    -->
-    <permission
-        android:name="com.google.android.gcm.demo.app.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-    <uses-permission
-        android:name="com.google.android.gcm.demo.app.permission.C2D_MESSAGE" />
-
-    <!-- This app has permission to register and receive data message. -->
-    <uses-permission
-        android:name="com.google.android.c2dm.permission.RECEIVE" />
-
-    <!-- Main activity. -->
     <application
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
+        android:allowBackup="true"
+        android:icon="@drawable/logo_dialer"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <activity
-            android:name=".RegActivity"
-            android:label="@string/app_name"
-            android:configChanges="orientation|keyboardHidden|screenSize">
+            android:name="com.railtiffin.railtiffin_dialer_application.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="com.railtiffin.railtiffin_dialer_application.MAINACTIVITY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.railtiffin.railtiffin_dialer_application.DashboardActivity"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <activity android:name="com.google.android.gcm.demo.app.DemoActivity" >
+        <activity android:name=".SearchActivity" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
-        <!--
-          BroadcastReceiver that will receive intents from GCM
-          services and handle them to the custom IntentService.
-
-          The com.google.android.c2dm.permission.SEND permission is necessary
-          so only GCM services can send data messages for the app.
-        -->
-        <receiver
-            android:name="com.google.android.gcm.GCMBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND" >
+        <!-- Pushy Declarations -->
+        <!-- Pushy Notification Receiver -->
+        <receiver android:name="com.railtiffin.railtiffin_dialer_application.PushReceiver" >
             <intent-filter>
-                <!-- Receives the actual messages. -->
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <!-- Receives the registration id. -->
-                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-                <category android:name="com.google.android.gcm.demo.app" />
+                <action android:name="pushy.me" />
             </intent-filter>
         </receiver>
 
-        <!--
-          Application-specific subclass of GCMBaseIntentService that will
-          handle received messages.
+        <!-- Pushy Update Receiver -->
+        <receiver android:name="me.pushy.sdk.receivers.PushyUpdateReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
 
-          By default, it must be named .GCMIntentService, unless the
-          application uses a custom BroadcastReceiver that redefines its name.
-        -->
-        <service android:name=".GCMIntentService" />
+                <data
+                    android:path="com.railtiffin.railtiffin_dialer_application"
+                    android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Pushy Socket Service -->
+        <service android:name="me.pushy.sdk.services.PushySocketService" />
+
+        <!-- Pushy Boot Receiver -->
+        <receiver android:name="me.pushy.sdk.receivers.PushyBootReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <!-- End Pushy Declarations -->
     </application>
 
 </manifest>
